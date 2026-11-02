@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Minimal status assumptions for the happy path (documented in README/PR):
+// ChangeRequest: open → in_pricing → pending_approval → approved → in_execution → done | cancelled
+// Quote: draft → pending_approval → approved | rejected
+// Execution: not_started → in_progress → done
+// Task: open → done
+// BillingDocument type: payment_request | invoice_record
+
+model Project {
+  id             String   @id @default(cuid())
+  name           String
+  developerName  String
+  contractorName String
+  notes          String   @default("")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  buildings       Building[]
+  buyers          Buyer[]
+  changeRequests  ChangeRequest[]
+  priceMatrix     PriceMatrixItem[]
+  quotes          Quote[]
+  documents       Document[]
+  tasks           Task[]
+  suppliers       Supplier[]
+  billingDocs     BillingDocument[]
+}
+
+model Building {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  units   Unit[]
+
+  @@index([projectId])
+}
+
+model Unit {
+  id         String   @id @default(cuid())
+  buildingId String
+  number     String
+  floor      String   @default("")
+  createdAt  DateTime @default(now())
+
+  building       Building        @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  buyer          Buyer?
+  changeRequests ChangeRequest[]
+
+  @@index([buildingId])
+}
+
+model Buyer {
+  id        String   @id @default(cuid())
+  projectId String
+  unitId    String   @unique
+  name      String
+  phone     String   @default("")
+  email     String   @default("")
+  createdAt DateTime @default(now())
+
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  unit           Unit            @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  changeRequests ChangeRequest[]
+
+  @@index([projectId])
+}
+
+model ChangeRequest {
+  id              String   @id @default(cuid())
+  projectId       String
+  unitId          String
+  buyerId         String
+  title           String
+  description     String   @default("")
+  status          String   @default("open")
+  executionStatus String   @default("not_started")
+  supplierId      String?
+  notes           String   @default("")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  unit      Unit              @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  buyer     Buyer             @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  supplier  Supplier?         @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  quotes    Quote[]
+  documents Document[]
+  tasks     Task[]
+  billing   BillingDocument[]
+
+  @@index([projectId])
+  @@index([unitId])
+  @@index([buyerId])
+}
+
+model PriceMatrixItem {
+  id          String   @id @default(cuid())
+  projectId   String
+  code        String
+  chapter     String
+  description String
+  unit        String
+  unitPrice   Float
+  source      String   @default("dekel-sample")
+  createdAt   DateTime @default(now())
+
+  project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  quoteLines QuoteLine[]
+
+  @@index([projectId])
+  @@unique([projectId, code])
+}
+
+model Quote {
+  id                   String    @id @default(cuid())
+  projectId            String
+  changeRequestId      String
+  status               String    @default("draft")
+  notes                String    @default("")
+  buyerApprovedAt      DateTime?
+  developerApprovedAt  DateTime?
+  buyerApprovedByNote  String    @default("")
+  developerApprovedByNote String @default("")
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  changeRequest ChangeRequest  @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  lines         QuoteLine[]
+  documents     Document[]
+  billing       BillingDocument[]
+
+  @@index([projectId])
+  @@index([changeRequestId])
+}
+
+model QuoteLine {
+  id            String @id @default(cuid())
+  quoteId       String
+  matrixItemId  String?
+  description   String
+  unit          String
+  quantity      Float
+  unitPrice     Float
+
+  quote      Quote            @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  matrixItem PriceMatrixItem? @relation(fields: [matrixItemId], references: [id], onDelete: SetNull)
+
+  @@index([quoteId])
+}
+
+model Document {
+  id              String   @id @default(cuid())
+  projectId       String
+  changeRequestId String?
+  quoteId         String?
+  name            String
+  filename        String
+  mimeType        String   @default("application/octet-stream")
+  storagePath     String
+  createdAt       DateTime @default(now())
+
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  changeRequest ChangeRequest? @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  quote         Quote?         @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([changeRequestId])
+  @@index([quoteId])
+}
+
+model Task {
+  id              String    @id @default(cuid())
+  projectId       String
+  changeRequestId String?
+  title           String
+  notes           String    @default("")
+  dueDate         DateTime?
+  status          String    @default("open")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  changeRequest ChangeRequest? @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  specialty String   @default("")
+  phone     String   @default("")
+  email     String   @default("")
+  notes     String   @default("")
+  createdAt DateTime @default(now())
+
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  changeRequests ChangeRequest[]
+
+  @@index([projectId])
+}
+
+model BillingDocument {
+  id              String   @id @default(cuid())
+  projectId       String
+  changeRequestId String?
+  quoteId         String?
+  type            String
+  title           String
+  amount          Float
+  issuedAt        DateTime @default(now())
+  notes           String   @default("")
+  createdAt       DateTime @default(now())
+
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  changeRequest ChangeRequest? @relation(fields: [changeRequestId], references: [id], onDelete: Cascade)
+  quote         Quote?         @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
