@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { AppShell, EmptyState, PageHeader } from "@/components/app-shell";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/statuses";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,9 @@ export default async function HomePage() {
         title="פרויקטים"
         description="כל פרויקט מבודד לחלוטין — נתונים, מחירון, ספקים ובקשות לא חוצים בין פרויקטים."
         actions={
-          <Button render={<Link href="/projects/new" />}>פרויקט חדש</Button>
+          <Link href="/projects/new" className={cn(buttonVariants())}>
+            פרויקט חדש
+          </Link>
         }
       />
 
@@ -39,15 +42,12 @@ export default async function HomePage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {projects.map((p) => (
-            <Card
-              key={p.id}
-              className="h-full transition-shadow hover:shadow-md relative"
-            >
+            <Card key={p.id} className="h-full transition-shadow hover:shadow-md">
               <CardHeader>
                 <CardTitle className="text-xl">
                   <Link
                     href={`/projects/${p.id}`}
-                    className="after:absolute after:inset-0 focus-visible:outline-none"
+                    className="text-foreground hover:text-primary hover:underline"
                   >
                     {p.name}
                   </Link>
@@ -63,13 +63,12 @@ export default async function HomePage() {
                   <div>משימות: {p._count.tasks}</div>
                   <div className="pt-2 text-xs">נוצר ב־{formatDate(p.createdAt)}</div>
                 </div>
-                <Button
-                  size="sm"
-                  className="relative z-10"
-                  render={<Link href={`/projects/${p.id}`} />}
+                <Link
+                  href={`/projects/${p.id}`}
+                  className={cn(buttonVariants({ size: "sm" }), "inline-flex")}
                 >
                   כניסה לפרויקט
-                </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
