@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/statuses";
+import { cn } from "@/lib/utils";
 
 export default async function RequestsPage({
   params,
@@ -40,9 +41,9 @@ export default async function RequestsPage({
         title="בקשות שינוי"
         description="רישום בקשות, מעקב סטטוסים וקישור להצעות מחיר ואישורים."
         actions={
-          <Button render={<Link href={`/projects/${projectId}/requests/new`} />}>
+          <Link href={`/projects/${projectId}/requests/new`} className={cn(buttonVariants())}>
             בקשה חדשה
-          </Button>
+          </Link>
         }
       />
 

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 export default function NewProjectPage() {
   return (
@@ -14,9 +15,9 @@ export default function NewProjectPage() {
         title="פרויקט חדש"
         description="יצירת פרויקט מבודד עם מחירון דקל לדוגמה."
         actions={
-          <Button variant="outline" render={<Link href="/" />}>
+          <Link href="/" className={cn(buttonVariants({ variant: "outline" }))}>
             חזרה
-          </Button>
+          </Link>
         }
       />
       <Card className="max-w-xl">

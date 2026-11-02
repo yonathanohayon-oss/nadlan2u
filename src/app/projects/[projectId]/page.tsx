@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatILS } from "@/lib/statuses";
+import { cn } from "@/lib/utils";
 
 export default async function ProjectOverviewPage({
   params,
@@ -51,15 +52,15 @@ export default async function ProjectOverviewPage({
         description={`יזם: ${project.developerName} · קבלן: ${project.contractorName}`}
         actions={
           <>
-            <Button render={<Link href={`/projects/${projectId}/requests/new`} />}>
+            <Link href={`/projects/${projectId}/requests/new`} className={cn(buttonVariants())}>
               בקשת שינוי חדשה
-            </Button>
-            <Button
-              variant="outline"
-              render={<Link href={`/projects/${projectId}/reports`} />}
+            </Link>
+            <Link
+              href={`/projects/${projectId}/reports`}
+              className={cn(buttonVariants({ variant: "outline" }))}
             >
               דוחות
-            </Button>
+            </Link>
           </>
         }
       />
@@ -86,13 +87,12 @@ export default async function ProjectOverviewPage({
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <CardTitle>בקשות אחרונות</CardTitle>
-            <Button
-              size="sm"
-              variant="ghost"
-              render={<Link href={`/projects/${projectId}/requests`} />}
+            <Link
+              href={`/projects/${projectId}/requests`}
+              className={cn(buttonVariants({ size: "sm", variant: "ghost" }))}
             >
               הכל
-            </Button>
+            </Link>
           </CardHeader>
           <CardContent className="space-y-3">
             {project.changeRequests.length === 0 && (
@@ -119,13 +119,12 @@ export default async function ProjectOverviewPage({
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <CardTitle>משימות פתוחות</CardTitle>
-            <Button
-              size="sm"
-              variant="ghost"
-              render={<Link href={`/projects/${projectId}/tasks`} />}
+            <Link
+              href={`/projects/${projectId}/tasks`}
+              className={cn(buttonVariants({ size: "sm", variant: "ghost" }))}
             >
               הכל
-            </Button>
+            </Link>
           </CardHeader>
           <CardContent className="space-y-3">
             {project.tasks.length === 0 && (

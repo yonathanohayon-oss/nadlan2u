@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { prisma } from "@/lib/prisma";
+import { cn } from "@/lib/utils";
 
 export default async function NewRequestPage({
   params,
@@ -43,12 +44,12 @@ export default async function NewRequestPage({
         title="בקשת שינוי חדשה"
         description="בחרו דירה/רוכש ורשמו את הבקשה. הסטטוס ההתחלתי: פתוחה."
         actions={
-          <Button
-            variant="outline"
-            render={<Link href={`/projects/${projectId}/requests`} />}
+          <Link
+            href={`/projects/${projectId}/requests`}
+            className={cn(buttonVariants({ variant: "outline" }))}
           >
             חזרה
-          </Button>
+          </Link>
         }
       />
 

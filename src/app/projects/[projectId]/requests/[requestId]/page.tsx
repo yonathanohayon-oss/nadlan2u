@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma";
 import {
+import { cn } from "@/lib/utils";
   CHANGE_REQUEST_STATUSES,
   CHANGE_REQUEST_STATUS_LABELS,
   EXECUTION_STATUSES,
@@ -86,12 +87,12 @@ export default async function RequestDetailPage({
         title={cr.title}
         description={`${cr.unit.building.name} · דירה ${cr.unit.number} · ${cr.buyer.name}`}
         actions={
-          <Button
-            variant="outline"
-            render={<Link href={`/projects/${projectId}/requests`} />}
+          <Link
+            href={`/projects/${projectId}/requests`}
+            className={cn(buttonVariants({ variant: "outline" }))}
           >
             לכל הבקשות
-          </Button>
+          </Link>
         }
       />
 
