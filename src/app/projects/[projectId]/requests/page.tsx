@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EmptyState, PageHeader } from "@/components/app-shell";
 import { CrStatusBadge, ExecutionBadge } from "@/components/status-badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
   TableBody,
